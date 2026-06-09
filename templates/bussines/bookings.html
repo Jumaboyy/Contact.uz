@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="main-content">
+    <section class="section">
+        <div class="row">
+            <div class="col-md-10 mx-auto">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4>Mening zakazlarim</h4>
+                        <a href="{% url 'home' %}" class="btn btn-light">Bosh sahifa</a>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="mb-4">Mening zakazlarim</h5>
+                        {% if bookings %}
+                            <div class="list-group">
+                                {% for booking in bookings %}
+                                    <div class="list-group-item mb-3">
+                                        <h5 class="mb-1">{{ booking.business.name }}</h5>
+                                        <p class="mb-1">
+                                            <strong>Sanalar:</strong> {{ booking.check_in }} - {{ booking.check_out }}<br>
+                                            <strong>Mehmonlar:</strong> {{ booking.guests }}<br>
+                                            <strong>Toʻlov usuli:</strong> {{ booking.get_payment_method_display }}<br>
+                                            <strong>Status:</strong> {{ booking.get_status_display }}<br>
+                                            <strong>Jami summa:</strong> {{ booking.total_price|floatformat:0 }} so‘m
+                                        </p>
+                                        <a href="{% url 'booking_pdf' booking.id %}" class="btn btn-sm btn-primary">PDF</a>
+                                        <small class="text-muted d-block mt-2">{{ booking.created_at }}</small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">Sizda hozircha hech qanday zakaz yo'q.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

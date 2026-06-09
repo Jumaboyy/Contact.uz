@@ -1,0 +1,599 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="main-content">
+    <section class="section">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>{{ business.name }}</h4>
+                        <p class="text-muted">{{ business.category.name }} | {{ business.region.name }} / {{ business.district.name }}</p>
+                    </div>
+                    <div class="card-body">
+                        {% if business.image %}
+                            <img src="{{ business.image.url }}" alt="{{ business.name }}" class="img-fluid rounded mb-3" style="width: 100%; max-height: 320px; object-fit: cover;" />
+                        {% else %}
+                            <img src="https://via.placeholder.com/800x320?text=No+Image" alt="{{ business.name }}" class="img-fluid rounded mb-3" style="width: 100%; max-height: 320px; object-fit: cover;" />
+                        {% endif %}
+                        <p><strong>Manzil:</strong> {{ business.address }}</p>
+                        <p><strong>Telefon:</strong> +998{{ business.phone }}</p>
+                        <div class="mb-3">
+                            {% if business.website %}
+                                <a href="{{ business.website }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary mr-2">Veb-sayt</a>
+                            {% endif %}
+                            {% if business.instagram %}
+                                <a href="{{ business.instagram }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-danger">Instagram</a>
+                            {% endif %}
+                        </div>
+                        {% if not is_location_service and not is_food_service %}
+                            {% if business.price %}
+                            <p><strong>Narx:</strong> {{ business.price|floatformat:0 }} so‘m / xona</p>
+                            {% else %}
+                            <p><strong>Narx:</strong> Belgilanmagan</p>
+                            {% endif %}
+                            <hr>
+                            <h5>Zakaz qilish</h5>
+                        {% elif not is_location_service and is_food_service %}
+                            <hr>
+                            <h5>Bron qilish</h5>
+                        {% else %}
+                            <hr>
+                            <h5>Lokatsiya</h5>
+                        {% endif %}
+
+                        {% if is_location_service %}
+                            <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#locationModal" data-bs-toggle="modal" data-bs-target="#locationModal">
+                                {% if is_pharmacy %}Dorixona lokatsiyasi{% else %}Manzilni ko‘rish{% endif %}
+                            </button>
+                        {% elif is_food_service %}
+                            <div class="d-flex flex-wrap mb-3">
+                                <button type="button" class="btn btn-primary mr-2 mb-2" data-toggle="modal" data-target="#bookingModal" data-bs-toggle="modal" data-bs-target="#bookingModal">
+                                    Joyni bron qilish
+                                </button>
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ maps_query|urlencode }}" target="_blank" class="btn btn-outline-primary mb-2">
+                                    Restoran yoki kafe lokatsiyasi
+                                </a>
+                            </div>
+                        {% else %}
+                            {% if is_hotel %}
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ maps_query|urlencode }}" target="_blank" class="btn btn-outline-primary mb-3 mr-2">
+                                    Xaritada ochish
+                                </a>
+                            {% endif %}
+                            <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#bookingModal" data-bs-toggle="modal" data-bs-target="#bookingModal">
+                                {% if is_hotel %}Mehmonxona bron qilish{% else %}Zakaz berish{% endif %}
+                            </button>
+                        {% endif %}
+                        <a href="{% url 'business_list' business.category.id %}" class="btn btn-secondary mb-3">Orqaga</a>
+
+                        {% if is_location_service %}
+                        <div class="modal fade" id="locationModal" tabindex="-1" role="dialog" aria-labelledby="locationModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-md" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="locationModalLabel">{% if is_pharmacy %}Dorixona lokatsiyasi{% elif is_medical_center %}Tibbiyot markazi lokatsiyasi{% else %}Manzilni ko‘rish{% endif %}</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Yopish">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Nom:</strong> {{ business.name }}</p>
+                                        <p><strong>Viloyat:</strong> {{ business.region.name }}</p>
+                                        <p><strong>Tuman:</strong> {{ business.district.name }}</p>
+                                        <p><strong>Manzil:</strong> {{ business.address }}</p>
+                                        <p><strong>Telefon:</strong> {{ business.phone }}</p>
+                                        <a href="https://www.google.com/maps/search/?api=1&query={{ maps_query|urlencode }}" target="_blank" class="btn btn-outline-primary btn-block">
+                                            Xaritada ochish
+                                        </a>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Yopish</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="bookingModalLabel">
+                                            {% if is_hotel %}Mehmonxona bron qilish{% elif is_food_service %}Joyni bron qilish{% else %}Zakaz berish{% endif %}
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Yopish">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+
+                                    <form method="post" id="bookingForm">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            {% if is_hotel %}
+                                                <div class="text-center mb-3" id="hotelRoomImageWrapper">
+                                                    <img id="hotelRoomImage" src="{{ business.image.url|default:'https://via.placeholder.com/800x320?text=Hotel+Room' }}" alt="Xona rasmi" class="img-fluid rounded" style="max-height: 280px; object-fit: cover;" />
+                                                </div>
+                                                <input type="hidden" id="businessBasePrice" value="{{ business.price|floatformat:0 }}" />
+                                                <p class="text-muted">Mehmonxonaga bron qoldirish uchun sanalarni, odamlar sonini va xona turini tanlang.</p>
+                                            {% elif is_food_service %}
+                                                <p class="text-muted">Restoran yoki kafe uchun sanani, vaqtni, odamlar sonini va joyni tanlang.</p>
+                                            {% else %}
+                                                <p class="text-muted">Zakaz uchun kerakli ma'lumotlarni to'ldiring.</p>
+                                            {% endif %}
+
+                                            {% if is_hotel %}
+                                            <div class="form-row" style="margin-top:10px;">
+                                                <div class="form-group col-md-12">
+                                                    <label for="hotel_room_type">Xona turi</label>
+                                                    <select id="hotel_room_type" name="room_type" class="form-control" required>
+                                                        <option value="">Tanlang</option>
+                                                        <option value="Single (SGL)">1kishilik xona (SGL)</option>
+                                                        <option value="Double (DBL)">2kishilik xona (DBL)</option>
+                                                        <option value="Twin (TWN)">2kishilik tosak (TWN)</option>
+                                                        <option value="Triple (TRPL)">3kishilik (TRPL)</option>
+                                                        <option value="Quadruple (QDPL)">4kishilik (QDPL)</option>
+                                                        <option value="Family Room">Oila xonasi</option>
+                                                        <option value="Standard">Standart</option>
+                                                        <option value="Superior">Superior</option>
+                                                        <option value="Deluxe">Deluxe</option>
+                                                        <option value="Suite / Luxe">Suit/Lyuks</option>
+                                                        <option value="Junior Suite">Kichik Suit</option>
+                                                        <option value="Apartment / Studio">Apartament/Studio</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-row" id="priceEstimateRow" style="margin-top:10px; display:none;">
+                                                <div class="form-group col-md-12">
+                                                    <div class="alert alert-info mb-0">
+                                                        Taxminiy toʻlov: <strong id="priceEstimateValue">0 so‘m</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            <div id="reservation_date_fields" class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="check_in">Kelish sanasi</label>
+                                                    <input type="date" id="check_in" name="check_in" class="form-control" required />
+                                                </div>
+                                                {% if is_food_service %}
+                                                <div class="form-group col-md-6">
+                                                    <label for="reservation_time">Kelish vaqti</label>
+                                                    <input type="time" id="reservation_time" name="reservation_time" class="form-control" required />
+                                                </div>
+                                                {% else %}
+                                                <div class="form-group col-md-6">
+                                                    <label for="check_out">Ketish sanasi</label>
+                                                    <input type="date" id="check_out" name="check_out" class="form-control" required />
+                                                </div>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="form-row">
+                                                <div class="form-group col-md-6">
+                                                    <label for="guests">{% if is_hotel %}Mehmonlar soni{% elif is_food_service %}Odamlar soni{% else %}Buyurtma miqdori / Odamlar soni{% endif %}</label>
+                                                    <input type="number" id="guests" name="guests" class="form-control" min="1" value="1" required />
+                                                </div>
+                                            </div>
+
+                                            {% if is_food_service %}
+                                                <input type="hidden" id="booking_type" name="booking_type" value="reservation" />
+                                                <p id="booking_info" class="text-muted">Joyni bron qilish uchun odamlar sonini va joyni tanlang.</p>
+
+                                                <div id="reservation_fields" style="margin-top:10px;">
+                                                    <div class="form-row">
+                                                        <div class="form-group col-md-12">
+                                                            <label class="font-weight-bold d-block">Qayeridan bron qilish</label>
+                                                            <div class="btn-group btn-group-toggle d-flex flex-wrap" data-toggle="buttons">
+                                                                <label class="btn btn-outline-primary active m-1">
+                                                                    <input type="radio" name="reservation_area" value="Ichki zal" autocomplete="off" checked> Ichki zal
+                                                                </label>
+                                                                <label class="btn btn-outline-primary m-1">
+                                                                    <input type="radio" name="reservation_area" value="Tashqi zal" autocomplete="off"> Tashqi zal
+                                                                </label>
+                                                                <label class="btn btn-outline-primary m-1">
+                                                                    <input type="radio" name="reservation_area" value="Terrasa" autocomplete="off"> Terrasa
+                                                                </label>
+                                                                <label class="btn btn-outline-primary m-1">
+                                                                    <input type="radio" name="reservation_area" value="VIP xona" autocomplete="off"> VIP xona
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <input type="hidden" name="booking_type" value="reservation" />
+                                            {% endif %}
+
+                                            <input type="hidden" name="payment_method" id="hidden_payment_method" value="" />
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Bekor qilish</button>
+                                            <button type="submit" class="btn btn-primary">{% if is_food_service %}Bron qilish{% else %}Zakaz berish{% endif %}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                                                {% endif %}
+
+                                                <!-- Payment modal for detail page (Stripe Elements) -->
+                                                <div class="modal fade" id="paymentModalDetail" tabindex="-1" role="dialog" aria-labelledby="paymentModalDetailLabel" aria-hidden="true">
+                                                    <div class="modal-dialog modal-sm" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="paymentModalDetailLabel">To'lov kartasi</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Yopish">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div id="card-element-detail" class="mb-2"></div>
+                                                                <div id="card-errors-detail" role="alert" class="text-danger mb-2"></div>
+                                                                <small id="card-issuer-detail" class="form-text text-muted"></small>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Bekor qilish</button>
+                                                                <button type="button" id="confirmPaymentBtnDetail" class="btn btn-primary">To'lovni davom ettirish</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const bookingTypeInput = document.getElementById('booking_type');
+                                const reservationDateFields = document.getElementById('reservation_date_fields');
+                                const reservationFields = document.getElementById('reservation_fields');
+                                const checkInInput = document.getElementById('check_in');
+                                const checkOutInput = document.getElementById('check_out');
+                                const reservationTimeInput = document.getElementById('reservation_time');
+                                const bookingInfo = document.getElementById('booking_info');
+                                const bookingModalLabel = document.getElementById('bookingModalLabel');
+                                const bookedButtons = document.querySelectorAll('[data-target="#bookingModal"], [data-bs-target="#bookingModal"]');
+                                const locationButtons = document.querySelectorAll('[data-target="#locationModal"], [data-bs-target="#locationModal"]');
+
+                                function setReservationMode() {
+                                    if (!bookingTypeInput) return;
+                                    bookingTypeInput.value = 'reservation';
+                                    if (reservationDateFields) reservationDateFields.style.display = 'flex';
+                                    if (reservationFields) reservationFields.style.display = 'block';
+                                    if (checkInInput) checkInInput.required = true;
+                                    if (checkOutInput) checkOutInput.required = false;
+                                    if (reservationTimeInput) reservationTimeInput.required = true;
+                                    if (bookingModalLabel) bookingModalLabel.textContent = 'Joyni bron qilish';
+                                    if (bookingInfo) bookingInfo.textContent = 'Joyni bron qilish uchun odamlar sonini va joyni tanlang.';
+                                }
+
+                                function resetHotelPreviewState() {
+                                    if (hotelRoomTypeSelect) {
+                                        hotelRoomTypeSelect.value = '';
+                                    }
+                                    if (hotelRoomImage) {
+                                        hotelRoomImage.src = defaultBusinessHotelImage;
+                                    }
+                                    if (hotelPriceEstimateRow) {
+                                        hotelPriceEstimateRow.style.display = 'none';
+                                    }
+                                    if (hotelRoomImageWrapper) {
+                                        hotelRoomImageWrapper.style.display = 'block';
+                                    }
+                                }
+
+                                bookedButtons.forEach(button => {
+                                    button.addEventListener('click', function () {
+                                        setReservationMode();
+                                        resetHotelPreviewState();
+                                    });
+                                });
+
+                                // Set defaults if the modal is opened through other triggers
+                                setReservationMode();
+
+                                function showModal(modalId) {
+                                    if (window.jQuery && typeof jQuery(modalId).modal === 'function') {
+                                        jQuery(modalId).modal('show');
+                                        return;
+                                    }
+
+                                    if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                                        const el = document.querySelector(modalId);
+                                        if (el) {
+                                            try {
+                                                const m = new window.bootstrap.Modal(el);
+                                                m.show();
+                                                return;
+                                            } catch (e) {}
+                                        }
+                                    }
+
+                                    const el = document.querySelector(modalId);
+                                    if (!el) return;
+                                    el.classList.add('show');
+                                    el.style.display = 'block';
+                                    el.setAttribute('aria-modal', 'true');
+                                    el.removeAttribute('aria-hidden');
+                                    const backdrop = document.createElement('div');
+                                    backdrop.className = 'modal-backdrop fade show';
+                                    document.body.appendChild(backdrop);
+                                }
+
+                                function attachFallback(buttons, modalId) {
+                                    buttons.forEach(button => {
+                                        button.addEventListener('click', function (event) {
+                                            if (!window.jQuery && !(window.bootstrap && typeof window.bootstrap.Modal === 'function')) {
+                                                event.preventDefault();
+                                                showModal(modalId);
+                                            }
+                                        });
+                                    });
+                                }
+
+                                attachFallback(bookedButtons, '#bookingModal');
+                                attachFallback(locationButtons, '#locationModal');
+
+                                const hotelRoomTypeSelect = document.getElementById('hotel_room_type');
+                                const hotelPriceEstimateRow = document.getElementById('priceEstimateRow');
+                                const hotelPriceEstimateValue = document.getElementById('priceEstimateValue');
+                                const businessBasePriceInput = document.getElementById('businessBasePrice');
+                                const hotelRoomImage = document.getElementById('hotelRoomImage');
+                                const hotelRoomImageWrapper = document.getElementById('hotelRoomImageWrapper');
+                                const bookingModalEl = document.getElementById('bookingModal');
+                                const defaultBusinessHotelImage = "{{ business.image.url|default:'https://via.placeholder.com/800x320?text=Hotel+Room'|escapejs }}";
+                                const hotelRoomImageMap = {
+                                    {% for room_image in business.room_images.all %}
+                                        '{{ room_image.room_type|escapejs }}': '{{ room_image.image.url|escapejs }}'{% if not forloop.last %},{% endif %}
+                                    {% endfor %}
+                                };
+                                const defaultHotelRoomImage = 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="320"><rect width="800" height="320" fill="%23eee"/><text x="50%" y="50%" fill="%23777" font-size="28" text-anchor="middle" dominant-baseline="middle">Hotel Room</text></svg>';
+
+                                if (hotelRoomTypeSelect) {
+                                    hotelRoomTypeSelect.value = '';
+                                }
+                                if (hotelRoomImage) {
+                                    hotelRoomImage.src = defaultBusinessHotelImage;
+                                }
+                                if (hotelPriceEstimateRow) {
+                                    hotelPriceEstimateRow.style.display = 'none';
+                                }
+                                if (hotelRoomImageWrapper) {
+                                    hotelRoomImageWrapper.style.display = 'block';
+                                }
+                                if (bookingModalEl) {
+                                    if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                                        bookingModalEl.addEventListener('show.bs.modal', resetHotelPreviewState);
+                                    }
+                                    if (window.jQuery && typeof jQuery === 'function') {
+                                        jQuery(bookingModalEl).on('show.bs.modal', resetHotelPreviewState);
+                                    }
+                                }
+
+                                function formatCurrency(value) {
+                                    return new Intl.NumberFormat('uz-UZ', {
+                                        maximumFractionDigits: 0,
+                                    }).format(value) + ' so‘m';
+                                }
+
+                                function getRoomMultiplier(roomType) {
+                                    const map = {
+                                        'Single (SGL)': 1.0,
+                                        'Double (DBL)': 1.4,
+                                        'Twin (TWN)': 1.4,
+                                        'Triple (TRPL)': 1.8,
+                                        'Quadruple (QDPL)': 2.2,
+                                        'Family Room': 2.4,
+                                        'Standard': 1.2,
+                                        'Superior': 1.5,
+                                        'Deluxe': 1.8,
+                                        'Suite / Luxe': 2.8,
+                                        'Junior Suite': 2.2,
+                                        'Apartment / Studio': 2.6,
+                                    };
+                                    return map[roomType] || 1.0;
+                                }
+
+                                function getRoomImageUrl(roomType) {
+                                    if (!roomType) {
+                                        return defaultBusinessHotelImage;
+                                    }
+                                    if (hotelRoomImageMap[roomType]) {
+                                        return hotelRoomImageMap[roomType];
+                                    }
+                                    const imageMap = {
+                                        'Single (SGL)': 'https://via.placeholder.com/800x320?text=Single+Room',
+                                        'Double (DBL)': 'https://via.placeholder.com/800x320?text=Double+Room',
+                                        'Twin (TWN)': 'https://via.placeholder.com/800x320?text=Twin+Room',
+                                        'Triple (TRPL)': 'https://via.placeholder.com/800x320?text=Triple+Room',
+                                        'Quadruple (QDPL)': 'https://via.placeholder.com/800x320?text=Quad+Room',
+                                        'Family Room': 'https://via.placeholder.com/800x320?text=Family+Room',
+                                        'Standard': 'https://via.placeholder.com/800x320?text=Standard+Room',
+                                        'Superior': 'https://via.placeholder.com/800x320?text=Superior+Room',
+                                        'Deluxe': 'https://via.placeholder.com/800x320?text=Deluxe+Room',
+                                        'Suite / Luxe': 'https://via.placeholder.com/800x320?text=Suite+Room',
+                                        'Junior Suite': 'https://via.placeholder.com/800x320?text=Junior+Suite',
+                                        'Apartment / Studio': 'https://via.placeholder.com/800x320?text=Apartment+Studio',
+                                    };
+                                    return imageMap[roomType] || defaultBusinessHotelImage;
+                                }
+
+                                function updateHotelPreview() {
+                                    if (!hotelRoomTypeSelect || !hotelPriceEstimateRow || !hotelPriceEstimateValue || !businessBasePriceInput) {
+                                        return;
+                                    }
+
+                                    const roomType = hotelRoomTypeSelect.value;
+                                    if (!hotelRoomImageWrapper) {
+                                        return;
+                                    }
+                                    hotelRoomImageWrapper.style.display = 'block';
+                                    if (hotelRoomImage) {
+                                        hotelRoomImage.src = defaultBusinessHotelImage;
+                                    }
+
+                                    if (!roomType) {
+                                        hotelPriceEstimateRow.style.display = 'none';
+                                        return;
+                                    }
+
+                                    const nights = (() => {
+                                        const inDate = new Date(checkInInput.value);
+                                        const outDate = new Date(checkOutInput.value);
+                                        if (!checkInInput.value || !checkOutInput.value || isNaN(inDate.getTime()) || isNaN(outDate.getTime())) {
+                                            return 1;
+                                        }
+                                        const diff = Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24));
+                                        return diff > 0 ? diff : 1;
+                                    })();
+
+                                    const guestsInput = document.getElementById('guests');
+                                    const guests = guestsInput ? Math.max(1, parseInt(guestsInput.value) || 1) : 1;
+                                    const basePrice = parseFloat(businessBasePriceInput.value) || 0;
+                                    const total = Math.round(basePrice * getRoomMultiplier(roomType) * nights * guests);
+
+                                    hotelPriceEstimateValue.textContent = formatCurrency(total);
+                                    hotelPriceEstimateRow.style.display = 'block';
+                                    if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'block';
+                                    if (hotelRoomImage) hotelRoomImage.src = defaultBusinessHotelImage;
+                                }
+
+                                if (hotelRoomTypeSelect) {
+                                    hotelRoomTypeSelect.addEventListener('change', updateHotelPreview);
+                                }
+                                if (checkInInput) {
+                                    checkInInput.addEventListener('change', updateHotelPreview);
+                                }
+                                if (checkOutInput) {
+                                    checkOutInput.addEventListener('change', updateHotelPreview);
+                                }
+                                const guestsInput = document.getElementById('guests');
+                                if (guestsInput) {
+                                    guestsInput.addEventListener('input', updateHotelPreview);
+                                }
+                                updateHotelPreview();
+
+                                // Payment modal flow for detail page: intercept booking form submit
+                                const paymentModalEl = document.getElementById('paymentModalDetail');
+                                const confirmPaymentBtn = document.getElementById('confirmPaymentBtnDetail');
+                                const bookingFormEl = document.getElementById('bookingForm');
+                                const cardErrorsDetailEl = document.getElementById('card-errors-detail');
+                                const cardIssuerDetailEl = document.getElementById('card-issuer-detail');
+                                let stripeDetail = null;
+                                let cardElementDetail = null;
+
+                                function detectCardIssuer(num) {
+                                    const cc = num.replace(/\s+/g, '');
+                                    if (/^4/.test(cc)) return 'Visa';
+                                    if (/^(5[1-5])/.test(cc) || /^(22[2-9]|2[3-6][0-9]|27[01]|2720)/.test(cc)) return 'Mastercard';
+                                    if (/^3[47]/.test(cc)) return 'American Express';
+                                    if (/^8600/.test(cc)) return 'Uzcard';
+                                    if (/^9860/.test(cc)) return 'Humo';
+                                    return '';
+                                }
+
+                                if (bookingFormEl) {
+                                    bookingFormEl.addEventListener('submit', function (e) {
+                                        // Ensure restaurant reservation_area is set when applicable
+                                        if ({% if is_food_service %}true{% else %}false{% endif %} && (!document.querySelector('input[name="reservation_area"]:checked'))) {
+                                            const firstArea = document.querySelector('input[name="reservation_area"]');
+                                            if (firstArea) firstArea.checked = true;
+                                        }
+
+                                        // If this is a food-service reservation (cash), do not intercept for payment modal — allow normal submit
+                                        if ({% if is_food_service %}true{% else %}false{% endif %}) {
+                                            return; // let the form submit normally (server will set payment_method='cash')
+                                        }
+
+                                        // Otherwise intercept and show payment modal for card-based flows
+                                        e.preventDefault();
+                                        if (window.jQuery && typeof jQuery(paymentModalEl).modal === 'function') {
+                                            jQuery(paymentModalEl).modal('show');
+                                        } else if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                                            const pm = new window.bootstrap.Modal(paymentModalEl);
+                                            pm.show();
+                                        }
+                                    });
+                                }
+
+                                // init Stripe Elements for detail form if key present
+                                const stripeKey = '{{ STRIPE_PUBLISHABLE_KEY|default:"" }}';
+                                if (stripeKey) {
+                                    const s = document.createElement('script');
+                                    s.src = 'https://js.stripe.com/v3/';
+                                    s.onload = function () {
+                                        try {
+                                            stripeDetail = Stripe(stripeKey);
+                                            const elements = stripeDetail.elements();
+                                            cardElementDetail = elements.create('card', {hidePostalCode: true});
+                                            cardElementDetail.mount('#card-element-detail');
+                                            cardElementDetail.on('change', function (event) {
+                                                if (event.error) {
+                                                    cardErrorsDetailEl.textContent = event.error.message;
+                                                } else {
+                                                    cardErrorsDetailEl.textContent = '';
+                                                }
+                                                if (event.brand) {
+                                                    cardIssuerDetailEl.textContent = 'Karta turi: ' + event.brand;
+                                                }
+                                            });
+                                        } catch (e) {
+                                            console.error('Stripe init error', e);
+                                        }
+                                    };
+                                    document.head.appendChild(s);
+                                }
+
+                                if (confirmPaymentBtn) {
+                                    confirmPaymentBtn.addEventListener('click', function () {
+                                        if (!stripeDetail || !cardElementDetail) {
+                                            const hiddenPayment = document.getElementById('hidden_payment_method');
+                                            if (hiddenPayment) hiddenPayment.value = 'stripe';
+                                            setTimeout(function () { bookingFormEl.submit(); }, 250);
+                                            return;
+                                        }
+                                        confirmPaymentBtn.disabled = true;
+                                        stripeDetail.createToken(cardElementDetail).then(function (result) {
+                                            confirmPaymentBtn.disabled = false;
+                                            if (result.error) {
+                                                cardErrorsDetailEl.textContent = result.error.message;
+                                                return;
+                                            }
+                                            const hiddenPayment = document.getElementById('hidden_payment_method');
+                                            if (hiddenPayment) hiddenPayment.value = 'stripe';
+                                            let tokenInput = document.getElementById('stripe_token_input');
+                                            if (!tokenInput) {
+                                                tokenInput = document.createElement('input');
+                                                tokenInput.type = 'hidden';
+                                                tokenInput.name = 'stripeToken';
+                                                tokenInput.id = 'stripe_token_input';
+                                                bookingFormEl.appendChild(tokenInput);
+                                            }
+                                            tokenInput.value = result.token.id;
+                                            let last4Input = document.getElementById('card_last4_input');
+                                            if (!last4Input) {
+                                                last4Input = document.createElement('input');
+                                                last4Input.type = 'hidden';
+                                                last4Input.name = 'card_last4';
+                                                last4Input.id = 'card_last4_input';
+                                                bookingFormEl.appendChild(last4Input);
+                                            }
+                                            last4Input.value = result.token.card.last4;
+                                            if (window.jQuery && typeof jQuery(paymentModalEl).modal === 'function') {
+                                                jQuery(paymentModalEl).modal('hide');
+                                            } else if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                                                const pm = new window.bootstrap.Modal(paymentModalEl);
+                                                pm.hide();
+                                            }
+                                            setTimeout(function () { bookingFormEl.submit(); }, 250);
+                                        });
+                                    });
+                                }
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

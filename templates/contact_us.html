@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!-- Main Content -->
+<div class="main-content">
+    <section class="section">
+
+      <!-- Flash Messages -->
+      {% if messages %}
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Yopish">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+          <div class="login-brand">Contact Uz</div>
+
+          <div class="card card-primary">
+            <div class="row m-0">
+              <div class="col-12">
+                <div class="card-header text-center">
+                  <h4>Xabar qoldirish</h4>
+                </div>
+                <div class="card-body">
+                  <form method="POST">{% csrf_token %}
+                    <div class="form-row">
+                      <!-- Ism -->
+                      <div class="form-group floating-addon col-md-6">
+                        <label>Ism</label>
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="far fa-user"></i></div>
+                          </div>
+                          <input id="name" type="text" class="form-control" name="name" placeholder="Ismingiz" required>
+                        </div>
+                      </div>
+
+                      <!-- Telefon -->
+                      <div class="form-group floating-addon col-md-6">
+                        <label>Telefon</label>
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fas fa-phone"></i></div>
+                          </div>
+                          <input id="phone" type="text" class="form-control" name="phone" placeholder="Telefon raqamingiz">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group floating-addon">
+                      <label>Email</label>
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <div class="input-group-text"><i class="fas fa-envelope"></i></div>
+                        </div>
+                        <input id="email" type="email" class="form-control" name="email" placeholder="example@email.com" required>
+                      </div>
+                    </div>
+
+                    <!-- Xabar -->
+                    <div class="form-group">
+                      <label>Xabar</label>
+                      <textarea class="form-control" placeholder="Xabaringizni yozing" name="message" data-height="150" style="height: 150px;" required></textarea>
+                    </div>
+
+                    <!-- Yuborish -->
+                    <div class="form-group text-right">
+                      <button type="submit" class="btn btn-round btn-lg btn-primary">Xabarni yuborish</button>
+                    </div>
+                  </form>
+                  <div class="card card-secondary mt-4">
+                    <div class="card-header text-center">
+                      <h4>Biznes qo‘shish</h4>
+                    </div>
+                    <div class="card-body text-center">
+                      <p>Biznesingizni ro‘yxatga olish uchun shu sahifaga o‘ting va kerakli ma’lumotlarni kiriting.</p>
+                      <a href="{% url 'business_create' %}" class="btn btn-outline-primary">Biznes qo‘shish</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="simple-footer">
+            Copyright © Jumaboy 2025
+          </div>
+        </div>
+      </div>
+    </section>
+</div>
+
+{% endblock %}

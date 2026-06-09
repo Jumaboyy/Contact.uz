@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="main-content">
+  <section class="section">
+    <div class="section-header">
+      <h1>Profil Sozlamalari</h1>
+    </div>
+
+    <div class="row mt-sm-4">
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h4>Shaxsiy Ma'lumotlar</h4>
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item d-flex justify-content-between"><strong>Ism:</strong> {{ user.first_name }}</li>
+              <li class="list-group-item d-flex justify-content-between"><strong>Familiya:</strong> {{ user.last_name }}</li>
+              <li class="list-group-item d-flex justify-content-between"><strong>Email:</strong> {{ user.email }}</li>
+              <li class="list-group-item d-flex justify-content-between"><strong>Username:</strong> {{ user.username }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h4>Profilni Tahrirlash</h4>
+          </div>
+          <form method="POST" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="first_name">Ism</label>
+                  <input type="text" name="first_name" id="first_name" class="form-control" value="{{ user.first_name }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="last_name">Familiya</label>
+                  <input type="text" name="last_name" id="last_name" class="form-control" value="{{ user.last_name }}" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="email">Email</label>
+                  <input type="email" name="email" id="email" class="form-control" value="{{ user.email }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="username">Foydalanuvchi nomi</label>
+                  <input type="text" name="username" id="username" class="form-control" value="{{ user.username }}" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="passport_series">Pasport seriyasi</label>
+                  <input type="text" name="passport_series" id="passport_series" class="form-control" value="{{ profile.passport_series }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="jshshr">JSHSHR</label>
+                  <input type="text" name="jshshr" id="jshshr" class="form-control" value="{{ profile.jshshr }}" required>
+                </div>
+              </div>
+              <hr>
+              <h5>Parolni Yangilash (ixtiyoriy)</h5>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="password1">Yangi Parol</label>
+                  <input type="password" name="password1" id="password1" class="form-control">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="password2">Parolni Tasdiqlash</label>
+                  <input type="password" name="password2" id="password2" class="form-control">
+                </div>
+              </div>
+            </div>
+            <div class="card-footer text-right">
+              <button class="btn btn-primary" type="submit">Saqlash</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

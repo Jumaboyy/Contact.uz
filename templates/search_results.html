@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<div class="main-content">
+    <section class="section">
+        <div class="section-header">
+            <h1>"{{ query }}" bo‘yicha natijalar</h1>
+        </div>
+
+        {% if results %}
+        <div class="row">
+            {% for b in results %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card shadow-sm h-100">
+                    {% if b.image %}
+                        {% if b.image %}
+                        <img src="{{ b.image.url }}" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                        {% else %}
+                        <img src="https://via.placeholder.com/400x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                        {% endif %}
+                    {% else %}
+                        <img src="https://via.placeholder.com/450x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h5 class="card-title font-weight-bold">{{ b.name }}</h5>
+                        <p class="mb-1"><i class="fas fa-map-marker-alt text-danger"></i> <strong>Viloyat:</strong> {{ b.region.name }}</p>
+                        <p class="mb-1"><i class="fas fa-map-pin text-info"></i> <strong>Tuman:</strong> {{ b.district.name }}</p>
+                        <p class="mb-1"><i class="fas fa-location-arrow text-success"></i> <strong>Manzil:</strong> {{ b.address }}</p>
+                    </div>
+
+                    <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted font-14">📞 Telefon:</span><br>
+                            <strong class="text-success">+998{{ b.phone }}</strong>
+                        </div>
+                        <a href="tel:+998{{ b.phone }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-phone"></i> Terish
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> "{{ query }}" bo‘yicha hech qanday natija topilmadi.
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <section class="section">
+<div class="row">
+  <div class="col-12">
+    <div class="card p-4 shadow-sm">
+      <form method="GET" action="{% url 'set_user_region' %}">
+        <div class="form-row align-items-end">
+          <!-- Viloyat -->
+          <div class="form-group col-md-5 col-sm-12">
+            <label for="region" class="font-weight-bold">Viloyat:</label>
+            <select name="region" id="region-select" class="form-control">
+              <option value="">-- Barchasi --</option>
+              {% for region in regions %}
+                <option value="{{ region.id }}"
+                        {% if user_region and user_region.region.id == region.id %}selected{% endif %}>
+                  {{ region.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Tuman -->
+          <div class="form-group col-md-5 col-sm-12">
+            <label for="district" class="font-weight-bold">Tuman/Shahar:</label>
+            <select name="district" id="district-select" class="form-control">
+              <option value="">-- Ixtiyoriy --</option>
+              {% for district in districts %}
+                <option value="{{ district.id }}"
+                        data-region="{{ district.region.id }}"
+                        {% if user_region and user_region.district and user_region.district.id == district.id %}selected{% endif %}>
+                  {{ district.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Tugma -->
+          <div class="form-group col-md-2 col-sm-12">
+            <label class="d-none d-md-block">&nbsp;</label>
+            <button type="submit" class="btn btn-primary btn-block w-100">
+              <i class="fas fa-filter mr-1"></i> Filtrlash
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="row">
+  {% for category in categories %}
+  <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+    <a href="{% url 'business_list' category.id %}" style="text-decoration: none;">
+      <div class="card h-100 border-0">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <!-- Text -->
+          <h5 class="mb-0 text-dark font-weight-bold" style="flex: 1;">
+            {{ category.name }}
+          </h5>
+          <!-- Image -->
+          <div style="width: 60px; height: 60px; margin-left: 10px; border-radius: 10px; overflow: hidden; background-color: #f1f1f1;">
+            {% if category.image %}
+              <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+              <img src="https://via.placeholder.com/60?text=%20" alt="No image" style="width: 100%; height: 100%; object-fit: cover;">
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+
+
+        </section>
+        <div class="settingSidebar">
+          <a href="javascript:void(0)" class="settingPanelToggle"> <i class="fa fa-spin fa-cog"></i>
+          </a>
+          <div class="settingSidebar-body ps-container ps-theme-default">
+            <div class=" fade show active">
+              <div class="setting-panel-header">Setting Panel
+              </div>
+              <div class="p-15 border-bottom">
+                <h6 class="font-medium m-b-10">Select Layout</h6>
+                <div class="selectgroup layout-color w-50">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="value" value="1" class="selectgroup-input-radio select-layout" checked>
+                    <span class="selectgroup-button">Light</span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="value" value="2" class="selectgroup-input-radio select-layout">
+                    <span class="selectgroup-button">Dark</span>
+                  </label>
+                </div>
+              </div>
+              <div class="p-15 border-bottom">
+                <h6 class="font-medium m-b-10">Sidebar Color</h6>
+                <div class="selectgroup selectgroup-pills sidebar-color">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="icon-input" value="1" class="selectgroup-input select-sidebar">
+                    <span class="selectgroup-button selectgroup-button-icon" data-toggle="tooltip"
+                      data-original-title="Light Sidebar"><i class="fas fa-sun"></i></span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="icon-input" value="2" class="selectgroup-input select-sidebar" checked>
+                    <span class="selectgroup-button selectgroup-button-icon" data-toggle="tooltip"
+                      data-original-title="Dark Sidebar"><i class="fas fa-moon"></i></span>
+                  </label>
+                </div>
+              </div>
+              <div class="p-15 border-bottom">
+                <h6 class="font-medium m-b-10">Color Theme</h6>
+                <div class="theme-setting-options">
+                  <ul class="choose-theme list-unstyled mb-0">
+                    <li title="white" class="active">
+                      <div class="white"></div>
+                    </li>
+                    <li title="cyan">
+                      <div class="cyan"></div>
+                    </li>
+                    <li title="black">
+                      <div class="black"></div>
+                    </li>
+                    <li title="purple">
+                      <div class="purple"></div>
+                    </li>
+                    <li title="orange">
+                      <div class="orange"></div>
+                    </li>
+                    <li title="green">
+                      <div class="green"></div>
+                    </li>
+                    <li title="red">
+                      <div class="red"></div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="p-15 border-bottom">
+                <div class="theme-setting-options">
+                  <label class="m-b-0">
+                    <input type="checkbox" name="custom-switch-checkbox" class="custom-switch-input"
+                      id="mini_sidebar_setting">
+                    <span class="custom-switch-indicator"></span>
+                    <span class="control-label p-l-10">Mini Sidebar</span>
+                  </label>
+                </div>
+              </div>
+              <div class="p-15 border-bottom">
+                <div class="theme-setting-options">
+                  <label class="m-b-0">
+                    <input type="checkbox" name="custom-switch-checkbox" class="custom-switch-input"
+                      id="sticky_header_setting">
+                    <span class="custom-switch-indicator"></span>
+                    <span class="control-label p-l-10">Sticky Header</span>
+                  </label>
+                </div>
+              </div>
+              <div class="mt-4 mb-4 p-3 align-center rt-sidebar-last-ele">
+                <a href="#" class="btn btn-icon icon-left btn-primary btn-restore-theme">
+                  <i class="fas fa-undo"></i> Restore Default
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+<script>
+  const regionSelect = document.getElementById('region-select');
+  const districtSelect = document.getElementById('district-select');
+
+  function filterDistricts() {
+    const selectedRegion = regionSelect.value;
+
+    Array.from(districtSelect.options).forEach(option => {
+      const regionId = option.getAttribute('data-region');
+      if (!regionId || regionId === selectedRegion) {
+        option.style.display = 'block';
+      } else {
+        option.style.display = 'none';
+      }
+    });
+
+    districtSelect.value = '';
+  }
+
+  regionSelect.addEventListener('change', filterDistricts);
+
+  // Sahifa yuklanganda districtlarni filtrlaymiz
+  window.addEventListener('DOMContentLoaded', filterDistricts);
+</script>
+
+        {% endblock %}

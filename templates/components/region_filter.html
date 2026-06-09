@@ -1,0 +1,31 @@
+<form method="get" action="" class="mb-4">
+  <div class="form-row align-items-end">
+    <div class="form-group col-md-5">
+      <label for="region">Viloyat</label>
+      <select id="region" name="region" class="form-control" onchange="this.form.submit()">
+        <option value="">-- Tanlang --</option>
+        {% for r in regions %}
+          <option value="{{ r.id }}" {% if selected_region.id == r.id %}selected{% endif %}>{{ r.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group col-md-5">
+      <label for="district">Tuman / Shahar</label>
+      <select id="district" name="district" class="form-control" onchange="this.form.submit()">
+        <option value="">-- Barchasi --</option>
+        {% for d in districts %}
+          {% if d.region_id == selected_region.id %}
+          <option value="{{ d.id }}" {% if selected_district and selected_district.id == d.id %}selected{% endif %}>
+            {{ d.name }}
+          </option>
+          {% endif %}
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group col-md-2">
+      <button type="submit" class="btn btn-primary btn-block">Filter</button>
+    </div>
+  </div>
+</form>

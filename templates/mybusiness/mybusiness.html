@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!-- Main Content -->
+<div class="main-content">
+    <section class="section">
+        <!-- Businesses cards -->
+        <div class="row">
+             <div class="col-12 mb-3">
+          <div class="login-brand">Men yaratgan biznes kontaktlar</div>
+      </div>
+            {% for b in businesses %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card  h-100">
+                    {% if b.image %}
+                        {% if b.image %}
+                        <img src="{{ b.image.url }}" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                        {% else %}
+                        <img src="https://via.placeholder.com/400x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                        {% endif %}
+                    {% else %}
+                        <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 180px;">
+                            <span class="font-weight-bold">Rasm yo‘q</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h5 class="card-title font-weight-bold">{{ b.name }}</h5>
+                        <p class="mb-1"><i class="fas fa-map-marker-alt text-danger"></i> <strong>Viloyat:</strong> {{ b.region }}</p>
+                        <p class="mb-1"><i class="fas fa-map-pin text-info"></i> <strong>Tuman:</strong> {{ b.district }}</p>
+                        <p class="mb-1"><i class="fas fa-location-arrow text-success"></i> <strong>Manzil:</strong> {{ b.address }}</p>
+                    </div>
+
+                <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+    <div>
+        <span class="text-muted font-14">📞 Telefon:</span><br>
+        <strong id="phone-{{ b.id }}" class="text-success copy-phone" style="cursor: pointer;" title="Nusxalash uchun bosing">
+            +998{{ b.phone }}
+        </strong>
+    </div>
+    <div class="btn-group">
+        <a href="{% url 'business_update' b.id %}" class="btn btn-sm btn-warning" title="Tahrirlash">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a href="{% url 'business_delete' b.id %}" class="btn btn-sm btn-danger" title="O'chirish">
+            <i class="fas fa-trash"></i>
+        </a>
+    </div>
+</div>
+
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<!-- Script: Dynamic filtering of districts -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const regionSelect = document.getElementById('region-select');
+        const districtSelect = document.getElementById('district-select');
+
+        function filterDistricts() {
+            const selectedRegion = regionSelect.value;
+
+            Array.from(districtSelect.options).forEach(option => {
+                const regionId = option.getAttribute('data-region');
+                if (!regionId || regionId === selectedRegion || option.value === "") {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        // Initially filter on load
+        filterDistricts();
+
+        // Re-filter when region changes
+        regionSelect.addEventListener('change', filterDistricts);
+    });
+</script>
+
+
+
+{% endblock %}

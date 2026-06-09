@@ -1,0 +1,573 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!-- Main Content -->
+<div class="main-content">
+    <section class="section">
+<div class="card">
+      <div class="card-body text-center p-5">
+    <h1 class="display-5 font-weight-bold mb-3 text-dark">O'z hududingizdagi eng yaxshi xizmatlar shu yerda!</h1>
+    <p class="lead mb-4 text-muted">Biznes katalog orqali o'zingizga kerakli xizmatni toping — tuman va viloyat bo‘yicha filtrlang.</p>
+    <a href="{% url 'business_category' %}" class="btn btn-primary btn-lg">
+      <i class="fas fa-th-large mr-1"></i> Kategoriyalarni Ko‘rish
+    </a>
+  </div>
+</div>
+
+
+
+
+    <div class="row text-center mb-5">
+      <div class="col-12 mb-3">
+          <div class="login-brand">Mashhur Kategoriyalar</div>
+      </div>
+      {% for category in categories|slice:":4" %}
+                <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+
+        <a href="{% url 'business_list' category.id %}" class="text-decoration-none">
+          <div class="card shadow-sm h-100 border-0">
+            <div class="card-body text-center">
+                            <div class="mb-3">
+                                {% if category.image %}
+                                    {% if category.image %}
+                                    <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px;">
+                                    {% else %}
+                                    <img src="https://via.placeholder.com/80?text=%20" alt="No image" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px;">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="https://via.placeholder.com/80?text=%20" alt="{{ category.name }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 12px;">
+                                {% endif %}
+                            </div>
+              <h5 class="text-dark font-weight-bold">{{ category.name }}</h5>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      {% endfor %}
+    </div>
+
+    <div class="row justify-content-center mb-5">
+      <div class="col-md-6 text-center">
+        <a href="{% url 'business_create' %}" class="btn btn-outline-primary btn-lg">
+          <i class="fas fa-plus mr-2"></i> Biznes qo‘shish
+        </a>
+      </div>
+    </div>
+
+    <div class="row text-center mb-5">
+  <div class="col-12 mb-3">
+          <div class="login-brand">Yangi Qo‘shilganlar</div>
+  </div>
+               {% for b in latest_businesses|slice:":4" %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card  h-100">
+                        {% if b.is_hotel %}
+                                {% if b.image %}
+                                    <img src="{{ b.image.url }}" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                                {% elif b.single_room_image_url %}
+                                    <img src="{{ b.single_room_image_url }}" class="card-img-top" alt="{{ b.name }} - Single Room" style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/450x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                                {% endif %}
+                        {% elif b.image %}
+                            {% if b.image %}
+                            <img src="{{ b.image.url }}" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                            {% else %}
+                            <img src="https://via.placeholder.com/400x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                            {% endif %}
+                        {% else %}
+                            <img src="https://via.placeholder.com/450x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                        {% endif %}
+
+                    <div class="card-body">
+                        <h5 class="card-title font-weight-bold">{{ b.name }}</h5>
+                        <p class="mb-1"><i class="fas fa-map-marker-alt text-danger"></i> <strong>Viloyat:</strong> {{ b.region }}</p>
+                        <p class="mb-1"><i class="fas fa-map-pin text-info"></i> <strong>Tuman:</strong> {{ b.district }}</p>
+                        <p class="mb-1"><i class="fas fa-location-arrow text-success"></i> <strong>Manzil:</strong> {{ b.address }}</p>
+                    </div>
+
+                 <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="text-muted font-14">📞 Telefon:</span><br>
+                            <strong id="phone-{{ b.id }}" class="text-success copy-phone" style="cursor: pointer;" title="Nusxalash uchun bosing">
+                                +998{{ b.phone }}
+                            </strong>
+                        </div>
+                        <a href="tel:+998{{ b.phone }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-phone"></i> Terish
+                        </a>
+                    </div>
+                        {% if b.price and not b.is_location_service and not b.is_food_service %}
+                            <p class="mb-2"><strong>Narx:</strong> {{ b.price|floatformat:0 }} so‘m / xona</p>
+                        {% elif not b.price and not b.is_location_service and not b.is_food_service %}
+                            <p class="mb-2"><strong>Narx:</strong> Belgilanmagan</p>
+                        {% endif %}
+                        <div class="mb-2">
+                            {% if b.website %}
+                                <a href="{{ b.website }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary mr-2">Veb-sayt</a>
+                            {% endif %}
+                            {% if b.instagram %}
+                                <a href="{{ b.instagram }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-danger">Instagram</a>
+                            {% endif %}
+                        </div>
+                        {% if b.is_location_service %}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ b.region|urlencode }}+{{ b.district|urlencode }}+{{ b.address|urlencode }}" target="_blank" class="btn btn-primary btn-block">
+                                <i class="fas fa-map-marker-alt mr-1"></i> Lokatsiya
+                            </a>
+                        {% elif b.is_hotel %}
+                            <div class="d-grid gap-2">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ b.region|urlencode }}+{{ b.district|urlencode }}+{{ b.address|urlencode }}" target="_blank" class="btn btn-outline-primary btn-block">
+                                            <i class="fas fa-map-marker-alt mr-1"></i> Lokatsiya
+                                        </a>
+                                        <button type="button" class="btn btn-primary btn-block open-food-modal" data-toggle="modal" data-target="#foodBookingModal" data-bs-toggle="modal" data-bs-target="#foodBookingModal" data-business-id="{{ b.id }}" data-business-name="{{ b.name|escapejs }}" data-business-region="{{ b.region.name|escapejs }}" data-business-district="{{ b.district.name|escapejs }}" data-business-address="{{ b.address|escapejs }}" data-business-type="hotel" data-business-price="{{ b.price|floatformat:0 }}" {% if b.single_room_image_url %}data-single-image="{{ b.single_room_image_url }}"{% endif %} {% if b.image %}data-business-image="{{ b.image.url }}"{% endif %}>
+                                            <i class="fas fa-calendar-check mr-1"></i> Bron qilish
+                                        </button>
+                            </div>
+                        {% elif b.is_food_service %}
+                            <div class="d-flex flex-column">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ b.region|urlencode }}+{{ b.district|urlencode }}+{{ b.address|urlencode }}" target="_blank" class="btn btn-outline-primary btn-block mb-2">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> Lokatsiya
+                                </a>
+                                <button type="button" class="btn btn-primary btn-block open-food-modal" data-toggle="modal" data-target="#foodBookingModal" data-bs-toggle="modal" data-bs-target="#foodBookingModal" data-business-id="{{ b.id }}" data-business-name="{{ b.name|escapejs }}" data-business-region="{{ b.region.name|escapejs }}" data-business-district="{{ b.district.name|escapejs }}" data-business-address="{{ b.address|escapejs }}" data-business-type="food" data-business-price="{{ b.price|floatformat:0 }}">
+                                    <i class="fas fa-calendar-check mr-1"></i> Bron qilish
+                                </button>
+                            </div>
+                        {% else %}
+                            <a href="{% url 'business_list' b.category.id %}" class="btn btn-primary btn-block">
+                                <i class="fas fa-calendar-check mr-1"></i> Zakaz berish
+                            </a>
+                        {% endif %}
+                </div>
+
+                </div>
+            </div>
+            {% endfor %}
+</div>
+
+<div class="modal fade" id="foodBookingModal" tabindex="-1" role="dialog" aria-labelledby="foodBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="foodBookingModalLabel">Joyni bron qilish</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Yopish">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" id="foodBookingForm">
+                {% csrf_token %}
+                <input type="hidden" name="business_id" id="hidden_business_id" value="" />
+                <div class="modal-body">
+                    <div class="text-center mb-3" id="hotelRoomImageWrapper" style="display:none;">
+                        <img id="hotelRoomImage" src="https://via.placeholder.com/800x320?text=Hotel+Room" alt="Xona rasmi" class="img-fluid rounded" style="max-height: 280px; object-fit: cover;" />
+                    </div>
+                    <input type="hidden" id="businessBasePrice" name="business_base_price" value="0" />
+                    <p class="text-muted" id="foodBookingCaption">Restoran yoki kafe uchun joyni bron qilish - sanani, vaqtni, odamlar sonini va joyni tanlang.</p>
+                    <input type="hidden" name="booking_type" value="reservation" />
+                    <div class="form-row" id="hotel_room_type_row" style="margin-top:10px; display:none;">
+                        <div class="form-group col-md-12">
+                            <label for="hotel_room_type">Xona turi</label>
+                            <select id="hotel_room_type" name="room_type" class="form-control">
+                                <option value="">Tanlang</option>
+                                <option value="Single (SGL)">1kishilik xona (SGL)</option>
+                                <option value="Double (DBL)">2kishilik xona (DBL)</option>
+                                <option value="Twin (TWN)">2kishilik tosak (TWN)</option>
+                                <option value="Triple (TRPL)">3kishilik (TRPL)</option>
+                                <option value="Quadruple (QDPL)">4kishilik (QDPL)</option>
+                                <option value="Family Room">Oila xonasi</option>
+                                <option value="Standard">Standart</option>
+                                <option value="Superior">Superior</option>
+                                <option value="Deluxe">Deluxe</option>
+                                <option value="Suite / Luxe">Suit/Lyuks</option>
+                                <option value="Junior Suite">Kichik Suit</option>
+                                <option value="Apartment / Studio">Apartament/Studio</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="food_check_in">Kelish sanasi</label>
+                            <input type="date" id="food_check_in" name="check_in" class="form-control" required />
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="food_reservation_time">Kelish vaqti</label>
+                            <input type="time" id="food_reservation_time" name="reservation_time" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="food_guests">Odamlar soni</label>
+                            <input type="number" id="food_guests" name="guests" class="form-control" min="1" value="1" required />
+                        </div>
+                    </div>
+                    <div class="form-row" id="food_check_out_row" style="margin-top:10px; display:none;">
+                        <div class="form-group col-md-6">
+                            <label for="food_check_out">Ketish sanasi</label>
+                            <input type="date" id="food_check_out" name="check_out" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-top:10px;">
+                        <div class="form-group col-md-12" id="bookingPaymentMethodRow" style="display:none;">
+                            <label for="payment_method">Toʻlov usuli</label>
+                            <select id="payment_method" name="payment_method" class="form-control">
+                                <option value="stripe">Stripe (karta)</option>
+                                <option value="click">Click</option>
+                                <option value="payme">Payme</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row" id="food_reservation_area_row" style="margin-top:10px; display:block;">
+                        <div class="form-group col-md-12">
+                            <label class="font-weight-bold d-block">Qayeridan bron qilish</label>
+                            <div class="btn-group btn-group-toggle d-flex flex-wrap" data-toggle="buttons">
+                                <label class="btn btn-outline-primary active m-1">
+                                    <input type="radio" name="reservation_area" value="Ichki zal" autocomplete="off" checked> Ichki zal
+                                </label>
+                                <label class="btn btn-outline-primary m-1">
+                                    <input type="radio" name="reservation_area" value="Tashqi zal" autocomplete="off"> Tashqi zal
+                                </label>
+                                <label class="btn btn-outline-primary m-1">
+                                    <input type="radio" name="reservation_area" value="Terrasa" autocomplete="off"> Terrasa
+                                </label>
+                                <label class="btn btn-outline-primary m-1">
+                                    <input type="radio" name="reservation_area" value="VIP xona" autocomplete="off"> VIP xona
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row" id="priceEstimateRow" style="margin-top:10px; display:none;">
+                        <div class="form-group col-md-12">
+                            <div class="alert alert-info mb-0">
+                                Taxminiy toʻlov: <strong id="priceEstimateValue">0 so‘m</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Bekor qilish</button>
+                    <button type="submit" class="btn btn-primary">Bron qilish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const openFoodButtons = document.querySelectorAll('.open-food-modal');
+        const foodBookingForm = document.getElementById('foodBookingForm');
+        const modalTitle = document.getElementById('foodBookingModalLabel');
+        const modalCaption = document.getElementById('foodBookingCaption');
+        const foodCheckOutRow = document.getElementById('food_check_out_row');
+        const foodReservationTime = document.getElementById('food_reservation_time');
+        const foodCheckOut = document.getElementById('food_check_out');
+        const reservationAreaRow = document.getElementById('food_reservation_area_row');
+        const hotelRoomTypeRow = document.getElementById('hotel_room_type_row');
+        const paymentMethodRow = document.getElementById('bookingPaymentMethodRow');
+        const paymentMethodSelect = document.getElementById('payment_method');
+        const hiddenBusinessId = document.getElementById('hidden_business_id');
+        const businessBasePrice = document.getElementById('businessBasePrice');
+        const hotelRoomImageWrapper = document.getElementById('hotelRoomImageWrapper');
+        const hotelRoomImage = document.getElementById('hotelRoomImage');
+        const hotelRoomTypeSelect = document.getElementById('hotel_room_type');
+        const priceEstimateRow = document.getElementById('priceEstimateRow');
+        const priceEstimateValue = document.getElementById('priceEstimateValue');
+        const foodGuests = document.getElementById('food_guests');
+        const foodCheckIn = document.getElementById('food_check_in');
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('uz-UZ', {
+                maximumFractionDigits: 0,
+            }).format(value) + ' so‘m';
+        }
+
+        function getRoomMultiplier(roomType) {
+            const map = {
+                'Single (SGL)': 1.0,
+                'Double (DBL)': 1.4,
+                'Twin (TWN)': 1.4,
+                'Triple (TRPL)': 1.8,
+                'Quadruple (QDPL)': 2.2,
+                'Family Room': 2.4,
+                'Standard': 1.2,
+                'Superior': 1.5,
+                'Deluxe': 1.8,
+                'Suite / Luxe': 2.8,
+                'Junior Suite': 2.2,
+                'Apartment / Studio': 2.6,
+            };
+            return map[roomType] || 1.0;
+        }
+
+        function getRoomImageUrl(roomType) {
+            const imageMap = {
+                'Single (SGL)': 'https://via.placeholder.com/800x320?text=Single+Room',
+                'Double (DBL)': 'https://via.placeholder.com/800x320?text=Double+Room',
+                'Twin (TWN)': 'https://via.placeholder.com/800x320?text=Twin+Room',
+                'Triple (TRPL)': 'https://via.placeholder.com/800x320?text=Triple+Room',
+                'Quadruple (QDPL)': 'https://via.placeholder.com/800x320?text=Quad+Room',
+                'Family Room': 'https://via.placeholder.com/800x320?text=Family+Room',
+                'Standard': 'https://via.placeholder.com/800x320?text=Standard+Room',
+                'Superior': 'https://via.placeholder.com/800x320?text=Superior+Room',
+                'Deluxe': 'https://via.placeholder.com/800x320?text=Deluxe+Room',
+                'Suite / Luxe': 'https://via.placeholder.com/800x320?text=Suite+Room',
+                'Junior Suite': 'https://via.placeholder.com/800x320?text=Junior+Suite',
+                'Apartment / Studio': 'https://via.placeholder.com/800x320?text=Apartment+Studio',
+            };
+            return imageMap[roomType] || 'https://via.placeholder.com/800x320?text=Hotel+Room';
+        }
+
+        function updateHotelPreview() {
+            if (!hotelRoomTypeSelect || !priceEstimateRow || !priceEstimateValue || !businessBasePrice) {
+                return;
+            }
+            const roomType = hotelRoomTypeSelect.value;
+            if (!roomType) {
+                priceEstimateRow.style.display = 'none';
+                if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'none';
+                return;
+            }
+
+            let nights = 1;
+            if (foodCheckIn && foodCheckOut && foodCheckIn.value && foodCheckOut.value) {
+                const inDate = new Date(foodCheckIn.value);
+                const outDate = new Date(foodCheckOut.value);
+                const diff = Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24));
+                if (!isNaN(diff) && diff > 0) {
+                    nights = diff;
+                }
+            }
+
+            const guests = foodGuests ? Math.max(1, parseInt(foodGuests.value) || 1) : 1;
+            const basePrice = parseFloat(businessBasePrice.value) || 0;
+            const total = Math.round(basePrice * getRoomMultiplier(roomType) * nights * guests);
+
+            priceEstimateValue.textContent = formatCurrency(total);
+            priceEstimateRow.style.display = 'block';
+            if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'block';
+            // keep showing the business main image for hotels; do not switch to room images
+        }
+
+        if (hotelRoomTypeSelect) {
+            hotelRoomTypeSelect.addEventListener('change', updateHotelPreview);
+        }
+        if (foodCheckIn) {
+            foodCheckIn.addEventListener('change', updateHotelPreview);
+        }
+        if (foodCheckOut) {
+            foodCheckOut.addEventListener('change', updateHotelPreview);
+        }
+        if (foodGuests) {
+            foodGuests.addEventListener('input', updateHotelPreview);
+        }
+
+        openFoodButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const businessId = button.dataset.businessId;
+                const businessName = button.dataset.businessName;
+                const region = button.dataset.businessRegion;
+                const district = button.dataset.businessDistrict;
+                const address = button.dataset.businessAddress;
+                const businessType = button.dataset.businessType || 'food';
+
+                if (foodBookingForm) {
+                    foodBookingForm.action = '/business/' + businessId + '/';
+                }
+                if (hiddenBusinessId) {
+                    hiddenBusinessId.value = businessId;
+                }
+                if (businessBasePrice) {
+                    businessBasePrice.value = button.dataset.businessPrice || '0';
+                }
+                if (modalTitle) {
+                    modalTitle.textContent = businessName + (businessType === 'hotel' ? ' - Mehmonxona bron qilish' : ' - Joyni bron qilish');
+                }
+                if (modalCaption) {
+                    if (businessType === 'hotel') {
+                        modalCaption.textContent = region + ', ' + district + ', ' + address + ' uchun kelish/ketish sanasini va odamlar sonini kiriting.';
+                    } else {
+                        modalCaption.textContent = region + ', ' + district + ', ' + address + ' uchun sanani, vaqtni, odamlar sonini va joyni tanlang.';
+                    }
+                }
+
+                    if (businessType === 'hotel') {
+                    const businessImage = button.dataset.businessImage || button.dataset.singleImage || null;
+                    if (hotelRoomTypeSelect) {
+                        hotelRoomTypeSelect.value = 'Single (SGL)';
+                        hotelRoomTypeSelect.required = true;
+                    }
+                    if (businessImage && hotelRoomImage) {
+                        hotelRoomImage.src = businessImage;
+                    }
+                    if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'block';
+                    if (foodCheckOutRow) foodCheckOutRow.style.display = 'flex';
+                    if (foodCheckOut) foodCheckOut.required = true;
+                    if (foodReservationTime) {
+                        foodReservationTime.required = false;
+                        foodReservationTime.closest('.form-group').style.display = 'none';
+                    }
+                    if (reservationAreaRow) reservationAreaRow.style.display = 'none';
+                    if (hotelRoomTypeRow) hotelRoomTypeRow.style.display = 'block';
+                    if (paymentMethodRow) paymentMethodRow.style.display = 'block';
+                    if (paymentMethodSelect) paymentMethodSelect.value = 'stripe';
+                    if (typeof updateHotelPreview === 'function') {
+                        updateHotelPreview();
+                    }
+                } else {
+                    if (foodCheckOutRow) foodCheckOutRow.style.display = 'none';
+                    if (foodCheckOut) foodCheckOut.value = '';
+                    if (foodReservationTime) {
+                        foodReservationTime.required = true;
+                        foodReservationTime.closest('.form-group').style.display = 'block';
+                    }
+                    if (reservationAreaRow) reservationAreaRow.style.display = 'block';
+                    if (hotelRoomTypeRow) hotelRoomTypeRow.style.display = 'none';
+                    if (hotelRoomTypeSelect) hotelRoomTypeSelect.required = false;
+                    if (paymentMethodRow) paymentMethodRow.style.display = 'none';
+                    if (paymentMethodSelect) paymentMethodSelect.value = 'stripe';
+                    if (priceEstimateRow) priceEstimateRow.style.display = 'none';
+                    if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'none';
+                }
+
+                const modalEl = document.getElementById('foodBookingModal');
+                if (window.jQuery && typeof jQuery(modalEl).modal === 'function') {
+                    jQuery(modalEl).modal('show');
+                } else if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                    const modalObj = new window.bootstrap.Modal(modalEl);
+                    modalObj.show();
+                }
+            });
+        });
+    });
+</script>
+
+    <div class="row text-center mb-5">
+      <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body py-4">
+            <h2 class="text-warning mb-1">{{ businesses_count|default:0 }}+</h2>
+            <p class="mb-0">Bizneslar ro‘yxatda</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body py-4">
+            <h2 class="text-success mb-1">{{ regions_count|default:0 }}</h2>
+            <p class="mb-0">Viloyatlar qamrovi</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body py-4">
+            <h2 class="text-danger mb-1">{{ users_count|default:0 }}+</h2>
+            <p class="mb-0">Faol foydalanuvchilar</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-primary text-white mb-5 shadow text-center p-4">
+      <h4>O‘z biznesingiz kontaktini qo‘shmoqchimisiz?</h4>
+      <a href="{% url 'business_create' %}" class="btn btn-light mt-3">Hozir ro‘yxatdan o‘ting</a>
+    </div>
+
+    </section>
+    <div class="settingSidebar">
+        <a href="javascript:void(0)" class="settingPanelToggle"> <i class="fa fa-spin fa-cog"></i>
+        </a>
+        <div class="settingSidebar-body ps-container ps-theme-default">
+            <div class=" fade show active">
+                <div class="setting-panel-header">Setting Panel
+                </div>
+                <div class="p-15 border-bottom">
+                    <h6 class="font-medium m-b-10">Select Layout</h6>
+                    <div class="selectgroup layout-color w-50">
+                        <label class="selectgroup-item">
+                            <input type="radio" name="value" value="1" class="selectgroup-input-radio select-layout"
+                                   checked>
+                            <span class="selectgroup-button">Light</span>
+                        </label>
+                        <label class="selectgroup-item">
+                            <input type="radio" name="value" value="2" class="selectgroup-input-radio select-layout">
+                            <span class="selectgroup-button">Dark</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="p-15 border-bottom">
+                    <h6 class="font-medium m-b-10">Sidebar Color</h6>
+                    <div class="selectgroup selectgroup-pills sidebar-color">
+                        <label class="selectgroup-item">
+                            <input type="radio" name="icon-input" value="1" class="selectgroup-input select-sidebar">
+                            <span class="selectgroup-button selectgroup-button-icon" data-toggle="tooltip"
+                                  data-original-title="Light Sidebar"><i class="fas fa-sun"></i></span>
+                        </label>
+                        <label class="selectgroup-item">
+                            <input type="radio" name="icon-input" value="2" class="selectgroup-input select-sidebar"
+                                   checked>
+                            <span class="selectgroup-button selectgroup-button-icon" data-toggle="tooltip"
+                                  data-original-title="Dark Sidebar"><i class="fas fa-moon"></i></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="p-15 border-bottom">
+                    <h6 class="font-medium m-b-10">Color Theme</h6>
+                    <div class="theme-setting-options">
+                        <ul class="choose-theme list-unstyled mb-0">
+                            <li title="white" class="active">
+                                <div class="white"></div>
+                            </li>
+                            <li title="cyan">
+                                <div class="cyan"></div>
+                            </li>
+                            <li title="black">
+                                <div class="black"></div>
+                            </li>
+                            <li title="purple">
+                                <div class="purple"></div>
+                            </li>
+                            <li title="orange">
+                                <div class="orange"></div>
+                            </li>
+                            <li title="green">
+                                <div class="green"></div>
+                            </li>
+                            <li title="red">
+                                <div class="red"></div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="p-15 border-bottom">
+                    <div class="theme-setting-options">
+                        <label class="m-b-0">
+                            <input type="checkbox" name="custom-switch-checkbox" class="custom-switch-input"
+                                   id="mini_sidebar_setting">
+                            <span class="custom-switch-indicator"></span>
+                            <span class="control-label p-l-10">Mini Sidebar</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="p-15 border-bottom">
+                    <div class="theme-setting-options">
+                        <label class="m-b-0">
+                            <input type="checkbox" name="custom-switch-checkbox" class="custom-switch-input"
+                                   id="sticky_header_setting">
+                            <span class="custom-switch-indicator"></span>
+                            <span class="control-label p-l-10">Sticky Header</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mt-4 mb-4 p-3 align-center rt-sidebar-last-ele">
+                    <a href="#" class="btn btn-icon icon-left btn-primary btn-restore-theme">
+                        <i class="fas fa-undo"></i> Restore Default
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    {% endblock %}

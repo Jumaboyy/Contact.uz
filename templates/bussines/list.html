@@ -1,0 +1,634 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!-- Main Content -->
+<div class="main-content">
+    <section class="section">
+<div class="row">
+  <div class="col-12">
+    <div class="card p-4 shadow-sm">
+      <form method="GET" action="{% url 'set_user_region' %}">
+        <div class="form-row align-items-end">
+          <!-- Viloyat -->
+          <div class="form-group col-md-5 col-sm-12">
+            <label for="region" class="font-weight-bold">Viloyat:</label>
+            <select name="region" id="region-select" class="form-control">
+              <option value="">-- Barchasi --</option>
+              {% for region in regions %}
+                <option value="{{ region.id }}"
+                        {% if user_region and user_region.region.id == region.id %}selected{% endif %}>
+                  {{ region.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Tuman -->
+          <div class="form-group col-md-5 col-sm-12">
+            <label for="district" class="font-weight-bold">Tuman/Shahar:</label>
+            <select name="district" id="district-select" class="form-control">
+              <option value="">-- Ixtiyoriy --</option>
+              {% for district in districts %}
+                <option value="{{ district.id }}"
+                        data-region="{{ district.region.id }}"
+                        {% if user_region and user_region.district and user_region.district.id == district.id %}selected{% endif %}>
+                  {{ district.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Tugma -->
+          <div class="form-group col-md-2 col-sm-12">
+            <label class="d-none d-md-block">&nbsp;</label>
+            <button type="submit" class="btn btn-primary btn-block w-100">
+              <i class="fas fa-filter mr-1"></i> Filtrlash
+            </button>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-12 d-flex justify-content-center mt-3">
+                {% if businesses.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if businesses.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ businesses.previous_page_number }}" aria-label="Previous">&laquo;</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                        {% endif %}
+                        <li class="page-item disabled"><span class="page-link">Sahifa {{ businesses.number }} / {{ businesses.paginator.num_pages }}</span></li>
+                        {% if businesses.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ businesses.next_page_number }}" aria-label="Next">&raquo;</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+        <!-- Businesses cards -->
+        <div class="row">
+            {% for b in businesses %}
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="card  h-100">
+                    {% if b.is_hotel %}
+                            {% if b.image %}
+                                <img src="{{ b.image.url }}" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                            {% elif b.single_room_image_url %}
+                                <img src="{{ b.single_room_image_url }}" class="card-img-top" alt="{{ b.name }} - Single Room" style="height: 180px; object-fit: cover;">
+                            {% else %}
+                                <img src="https://via.placeholder.com/450x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                            {% endif %}
+                    {% else %}
+                        {% if b.image %}
+                            {% if b.image %}
+                            <img src="{{ b.image.url }}" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                            {% else %}
+                            <img src="https://via.placeholder.com/400x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                            {% endif %}
+                        {% else %}
+                            <img src="https://via.placeholder.com/450x180?text=No+Image" class="card-img-top" alt="{{ b.name }}" style="height: 180px; object-fit: cover;">
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h5 class="card-title font-weight-bold">{{ b.name }}</h5>
+                        <p class="mb-1"><i class="fas fa-map-marker-alt text-danger"></i> <strong>Viloyat:</strong> {{ b.region }}</p>
+                        <p class="mb-1"><i class="fas fa-map-pin text-info"></i> <strong>Tuman:</strong> {{ b.district }}</p>
+                        <p class="mb-1"><i class="fas fa-location-arrow text-success"></i> <strong>Manzil:</strong> {{ b.address }}</p>
+                    </div>
+
+                 <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <span class="text-muted font-14">📞 Telefon:</span><br>
+                            <strong id="phone-{{ b.id }}" class="text-success copy-phone" style="cursor: pointer;" title="Nusxalash uchun bosing">
+                                +998{{ b.phone }}
+                            </strong>
+                        </div>
+                        <a href="tel:+998{{ b.phone }}" class="btn btn-sm btn-success">
+                            <i class="fas fa-phone"></i> Terish
+                        </a>
+                    </div>
+                        {% if b.price and not b.is_location_service and not b.is_food_service %}
+                            <p class="mb-2"><strong>Narx:</strong> {{ b.price|floatformat:0 }} so‘m / xona</p>
+                        {% elif not b.price and not b.is_location_service and not b.is_food_service %}
+                            <p class="mb-2"><strong>Narx:</strong> Belgilanmagan</p>
+                        {% endif %}
+                        <div class="mb-2">
+                            {% if b.website %}
+                                <a href="{{ b.website }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary mr-2">Veb-sayt</a>
+                            {% endif %}
+                            {% if b.instagram %}
+                                <a href="{{ b.instagram }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-danger">Instagram</a>
+                            {% endif %}
+                        </div>
+                        {% if b.is_location_service %}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ b.region|urlencode }}+{{ b.district|urlencode }}+{{ b.address|urlencode }}" target="_blank" class="btn btn-primary btn-block">
+                                <i class="fas fa-map-marker-alt mr-1"></i> Lokatsiya
+                            </a>
+                        {% elif b.is_hotel %}
+                            <div class="d-grid gap-2">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ b.region|urlencode }}+{{ b.district|urlencode }}+{{ b.address|urlencode }}" target="_blank" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> Lokatsiya
+                                </a>
+                                <button type="button" class="btn btn-primary btn-block open-food-modal" data-toggle="modal" data-target="#foodBookingModal" data-bs-toggle="modal" data-bs-target="#foodBookingModal" data-business-id="{{ b.id }}" data-business-name="{{ b.name|escapejs }}" data-business-region="{{ b.region.name|escapejs }}" data-business-district="{{ b.district.name|escapejs }}" data-business-address="{{ b.address|escapejs }}" data-business-type="hotel" data-business-price="{{ b.price|floatformat:0 }}" {% if b.single_room_image_url %}data-single-image="{{ b.single_room_image_url }}"{% endif %} {% if b.image %}data-business-image="{{ b.image.url }}"{% endif %}>
+                                    <i class="fas fa-calendar-check mr-1"></i> Bron qilish
+                                </button>
+                            </div>
+                        {% elif b.is_food_service %}
+                            <div class="d-flex flex-column">
+                                <a href="https://www.google.com/maps/search/?api=1&query={{ b.region|urlencode }}+{{ b.district|urlencode }}+{{ b.address|urlencode }}" target="_blank" class="btn btn-outline-primary btn-block mb-2">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> Lokatsiya
+                                </a>
+                                <button type="button" class="btn btn-primary btn-block open-food-modal" data-toggle="modal" data-target="#foodBookingModal" data-bs-toggle="modal" data-bs-target="#foodBookingModal" data-business-id="{{ b.id }}" data-business-name="{{ b.name|escapejs }}" data-business-region="{{ b.region.name|escapejs }}" data-business-district="{{ b.district.name|escapejs }}" data-business-address="{{ b.address|escapejs }}" data-business-type="food" data-business-price="{{ b.price|floatformat:0 }}">
+                                    <i class="fas fa-calendar-check mr-1"></i> Bron qilish
+                                </button>
+                            </div>
+                        {% else %}
+                            <a href="{% url 'business_list' b.category.id %}" class="btn btn-primary btn-block">
+                                <i class="fas fa-calendar-check mr-1"></i> Zakaz berish
+                            </a>
+                        {% endif %}
+                </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<!-- Script: Dynamic filtering of districts -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const regionSelect = document.getElementById('region-select');
+        const districtSelect = document.getElementById('district-select');
+
+        function filterDistricts() {
+            const selectedRegion = regionSelect.value;
+
+            Array.from(districtSelect.options).forEach(option => {
+                const regionId = option.getAttribute('data-region');
+                if (!regionId || regionId === selectedRegion || option.value === "") {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        // Initially filter on load
+        filterDistricts();
+
+        // Re-filter when region changes
+        regionSelect.addEventListener('change', filterDistricts);
+    });
+</script>
+
+<div class="modal fade" id="foodBookingModal" tabindex="-1" role="dialog" aria-labelledby="foodBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="foodBookingModalLabel">Joyni bron qilish</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Yopish">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" id="foodBookingForm">
+                {% csrf_token %}
+                <input type="hidden" name="business_id" id="hidden_business_id" value="" />
+                <div class="modal-body">
+                    <div class="text-center mb-3" id="hotelRoomImageWrapper" style="display:none;">
+                        <img id="hotelRoomImage" src="https://via.placeholder.com/800x320?text=Hotel+Room" alt="Xona rasmi" class="img-fluid rounded" style="max-height: 280px; object-fit: cover;" />
+                    </div>
+                    <input type="hidden" id="businessBasePrice" name="business_base_price" value="0" />
+                    <p class="text-muted" id="foodBookingCaption">Iltimos, sanani, vaqtni, odamlar sonini va joyni tanlang.</p>
+                    <input type="hidden" name="booking_type" value="reservation" />
+                    <div class="form-row" id="hotel_room_type_row" style="margin-top:10px; display:none;">
+                        <div class="form-group col-md-12">
+                            <label for="hotel_room_type">Xona turi</label>
+                            <select id="hotel_room_type" name="room_type" class="form-control">
+                                <option value="">Tanlang</option>
+                                <option value="Single (SGL)">1kishilik xona (SGL)</option>
+                                <option value="Double (DBL)">2kishilik xona (DBL)</option>
+                                <option value="Twin (TWN)">2kishilik tosak (TWN)</option>
+                                <option value="Triple (TRPL)">3kishilik (TRPL)</option>
+                                <option value="Quadruple (QDPL)">4kishilik (QDPL)</option>
+                                <option value="Family Room">Oila xonasi</option>
+                                <option value="Standard">Standart</option>
+                                <option value="Superior">Superior</option>
+                                <option value="Deluxe">Deluxe</option>
+                                <option value="Suite / Luxe">Suit/Lyuks</option>
+                                <option value="Junior Suite">Kichik Suit</option>
+                                <option value="Apartment / Studio">Apartament/Studio</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="food_check_in">Kelish sanasi</label>
+                            <input type="date" id="food_check_in" name="check_in" class="form-control" required />
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="food_reservation_time">Kelish vaqti</label>
+                            <input type="time" id="food_reservation_time" name="reservation_time" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="food_guests">Odamlar soni</label>
+                            <input type="number" id="food_guests" name="guests" class="form-control" min="1" value="1" required />
+                        </div>
+                    </div>
+                    <div class="form-row" id="food_check_out_row" style="margin-top:10px; display:none;">
+                        <div class="form-group col-md-6">
+                            <label for="food_check_out">Ketish sanasi</label>
+                            <input type="date" id="food_check_out" name="check_out" class="form-control" />
+                        </div>
+                    </div>
+                    <input type="hidden" name="payment_method" id="hidden_payment_method" value="" />
+                    <div class="form-row" id="food_reservation_area_row" style="margin-top:10px; display:block;">
+                        <div class="form-group col-md-12">
+                            <label class="font-weight-bold d-block">Qayeridan bron qilish</label>
+                            <div class="btn-group btn-group-toggle d-flex flex-wrap" data-toggle="buttons">
+                                <label class="btn btn-outline-primary active m-1">
+                                    <input type="radio" name="reservation_area" value="Ichki zal" autocomplete="off" checked> Ichki zal
+                                </label>
+                                <label class="btn btn-outline-primary m-1">
+                                    <input type="radio" name="reservation_area" value="Tashqi zal" autocomplete="off"> Tashqi zal
+                                </label>
+                                <label class="btn btn-outline-primary m-1">
+                                    <input type="radio" name="reservation_area" value="Terrasa" autocomplete="off"> Terrasa
+                                </label>
+                                <label class="btn btn-outline-primary m-1">
+                                    <input type="radio" name="reservation_area" value="VIP xona" autocomplete="off"> VIP xona
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row" id="priceEstimateRow" style="margin-top:10px; display:none;">
+                        <div class="form-group col-md-12">
+                            <div class="alert alert-info mb-0">
+                                Taxminiy toʻlov: <strong id="priceEstimateValue">0 so‘m</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Bekor qilish</button>
+                                        <button type="submit" class="btn btn-primary">Bron qilish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Payment modal: Stripe Elements -->
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">To'lov kartasi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Yopish">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="card-element" class="mb-2"><!-- Stripe Element will be inserted here --></div>
+                <div id="card-errors" role="alert" class="text-danger mb-2"></div>
+                <small id="card-issuer" class="form-text text-muted"></small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Bekor qilish</button>
+                <button type="button" id="confirmPaymentBtn" class="btn btn-primary">To'lovni davom ettirish</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const openFoodButtons = document.querySelectorAll('.open-food-modal');
+        const foodBookingForm = document.getElementById('foodBookingForm');
+        const modalTitle = document.getElementById('foodBookingModalLabel');
+        const modalCaption = document.getElementById('foodBookingCaption');
+        const foodCheckOutRow = document.getElementById('food_check_out_row');
+        const foodReservationTime = document.getElementById('food_reservation_time');
+        const foodCheckOut = document.getElementById('food_check_out');
+        const reservationAreaRow = document.getElementById('food_reservation_area_row');
+        const hotelRoomTypeRow = document.getElementById('hotel_room_type_row');
+        const paymentMethodRow = document.getElementById('bookingPaymentMethodRow');
+        const hiddenPaymentMethod = document.getElementById('hidden_payment_method');
+        const hiddenBusinessId = document.getElementById('hidden_business_id');
+        const businessBasePrice = document.getElementById('businessBasePrice');
+        const hotelRoomImageWrapper = document.getElementById('hotelRoomImageWrapper');
+        const hotelRoomImage = document.getElementById('hotelRoomImage');
+        const hotelRoomTypeSelect = document.getElementById('hotel_room_type');
+        const priceEstimateRow = document.getElementById('priceEstimateRow');
+        const priceEstimateValue = document.getElementById('priceEstimateValue');
+        const foodGuests = document.getElementById('food_guests');
+        const foodCheckIn = document.getElementById('food_check_in');
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('uz-UZ', {
+                maximumFractionDigits: 0,
+            }).format(value) + ' so‘m';
+        }
+
+        function getRoomMultiplier(roomType) {
+            const map = {
+                'Single (SGL)': 1.0,
+                'Double (DBL)': 1.4,
+                'Twin (TWN)': 1.4,
+                'Triple (TRPL)': 1.8,
+                'Quadruple (QDPL)': 2.2,
+                'Family Room': 2.4,
+                'Standard': 1.2,
+                'Superior': 1.5,
+                'Deluxe': 1.8,
+                'Suite / Luxe': 2.8,
+                'Junior Suite': 2.2,
+                'Apartment / Studio': 2.6,
+            };
+            return map[roomType] || 1.0;
+        }
+
+        function getRoomImageUrl(roomType) {
+            const imageMap = {
+                'Single (SGL)': 'https://via.placeholder.com/800x320?text=Single+Room',
+                'Double (DBL)': 'https://via.placeholder.com/800x320?text=Double+Room',
+                'Twin (TWN)': 'https://via.placeholder.com/800x320?text=Twin+Room',
+                'Triple (TRPL)': 'https://via.placeholder.com/800x320?text=Triple+Room',
+                'Quadruple (QDPL)': 'https://via.placeholder.com/800x320?text=Quad+Room',
+                'Family Room': 'https://via.placeholder.com/800x320?text=Family+Room',
+                'Standard': 'https://via.placeholder.com/800x320?text=Standard+Room',
+                'Superior': 'https://via.placeholder.com/800x320?text=Superior+Room',
+                'Deluxe': 'https://via.placeholder.com/800x320?text=Deluxe+Room',
+                'Suite / Luxe': 'https://via.placeholder.com/800x320?text=Suite+Room',
+                'Junior Suite': 'https://via.placeholder.com/800x320?text=Junior+Suite',
+                'Apartment / Studio': 'https://via.placeholder.com/800x320?text=Apartment+Studio',
+            };
+            return imageMap[roomType] || 'https://via.placeholder.com/800x320?text=Hotel+Room';
+        }
+
+        function updateHotelPreview() {
+            if (!hotelRoomTypeSelect || !priceEstimateRow || !priceEstimateValue || !businessBasePrice) {
+                return;
+            }
+            const roomType = hotelRoomTypeSelect.value;
+            if (!roomType) {
+                priceEstimateRow.style.display = 'none';
+                if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'none';
+                return;
+            }
+
+            let nights = 1;
+            if (foodCheckIn && foodCheckOut && foodCheckIn.value && foodCheckOut.value) {
+                const inDate = new Date(foodCheckIn.value);
+                const outDate = new Date(foodCheckOut.value);
+                const diff = Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24));
+                if (!isNaN(diff) && diff > 0) {
+                    nights = diff;
+                }
+            }
+
+            const guests = foodGuests ? Math.max(1, parseInt(foodGuests.value) || 1) : 1;
+            const basePrice = parseFloat(businessBasePrice.value) || 0;
+            const total = Math.round(basePrice * getRoomMultiplier(roomType) * nights * guests);
+
+            priceEstimateValue.textContent = formatCurrency(total);
+            priceEstimateRow.style.display = 'block';
+            if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'block';
+            // keep showing the business main image for hotels; do not switch to room images
+        }
+
+        if (hotelRoomTypeSelect) {
+            hotelRoomTypeSelect.addEventListener('change', updateHotelPreview);
+        }
+        if (foodCheckIn) {
+            foodCheckIn.addEventListener('change', updateHotelPreview);
+        }
+        if (foodCheckOut) {
+            foodCheckOut.addEventListener('change', updateHotelPreview);
+        }
+        if (foodGuests) {
+            foodGuests.addEventListener('input', updateHotelPreview);
+        }
+
+        openFoodButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const businessId = button.dataset.businessId;
+                const businessName = button.dataset.businessName;
+                const region = button.dataset.businessRegion;
+                const district = button.dataset.businessDistrict;
+                const address = button.dataset.businessAddress;
+                const businessType = button.dataset.businessType || 'food';
+
+                if (foodBookingForm) {
+                    foodBookingForm.action = '/business/' + businessId + '/';
+                }
+                if (hiddenBusinessId) {
+                    hiddenBusinessId.value = businessId;
+                }
+                if (businessBasePrice) {
+                    businessBasePrice.value = button.dataset.businessPrice || '0';
+                }                if (modalTitle) {
+                    modalTitle.textContent = businessName + (businessType === 'hotel' ? ' - Mehmonxona bron qilish' : ' - Joyni bron qilish');
+                }
+                if (modalCaption) {
+                    if (businessType === 'hotel') {
+                        modalCaption.textContent = 'Mehmonxona bron qilish uchun sanani, odamlar sonini va xona turini tanlang.';
+                    } else {
+                        modalCaption.textContent = 'Restoran yoki kafe uchun sanani, vaqtni, odamlar sonini va joyni tanlang.';
+                    }
+                }
+
+                if (businessType === 'hotel') {
+                    const businessImage = button.dataset.businessImage || button.dataset.singleImage || null;
+                    if (hotelRoomTypeSelect) {
+                        hotelRoomTypeSelect.value = 'Single (SGL)';
+                        hotelRoomTypeSelect.required = true;
+                    }
+                    if (businessImage && hotelRoomImage) {
+                        hotelRoomImage.src = businessImage;
+                    }
+                    if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'block';
+                    if (foodCheckOutRow) foodCheckOutRow.style.display = 'flex';
+                    if (foodCheckOut) foodCheckOut.required = true;
+                    if (foodReservationTime) {
+                        foodReservationTime.required = false;
+                        foodReservationTime.closest('.form-group').style.display = 'none';
+                    }
+                    if (reservationAreaRow) reservationAreaRow.style.display = 'none';
+                    if (hotelRoomTypeRow) hotelRoomTypeRow.style.display = 'block';
+                    if (paymentMethodRow) paymentMethodRow.style.display = 'block';
+                    if (hiddenPaymentMethod) hiddenPaymentMethod.value = 'stripe';
+                    if (typeof updateHotelPreview === 'function') {
+                        updateHotelPreview();
+                    }
+                } else {
+                    if (foodCheckOutRow) foodCheckOutRow.style.display = 'none';
+                    if (foodCheckOut) foodCheckOut.value = '';
+                    if (foodReservationTime) {
+                        foodReservationTime.required = true;
+                        foodReservationTime.closest('.form-group').style.display = 'block';
+                    }
+                    if (reservationAreaRow) reservationAreaRow.style.display = 'block';
+                    if (hotelRoomTypeRow) hotelRoomTypeRow.style.display = 'none';
+                    if (hotelRoomTypeSelect) hotelRoomTypeSelect.required = false;
+                    if (paymentMethodRow) paymentMethodRow.style.display = 'none';
+                    if (hiddenPaymentMethod) hiddenPaymentMethod.value = '';
+                    if (priceEstimateRow) priceEstimateRow.style.display = 'none';
+                    if (hotelRoomImageWrapper) hotelRoomImageWrapper.style.display = 'none';
+                }
+
+                const modalEl = document.getElementById('foodBookingModal');
+                if (window.jQuery && typeof jQuery(modalEl).modal === 'function') {
+                    jQuery(modalEl).modal('show');
+                } else if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                    const modalObj = new window.bootstrap.Modal(modalEl);
+                    modalObj.show();
+                }
+            });
+        });
+
+        // Payment modal flow: intercept booking form submit, validate card, set payment_method and submit
+        const paymentModalEl = document.getElementById('paymentModal');
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        const cardErrorsEl = document.getElementById('card-errors');
+        const cardIssuerEl = document.getElementById('card-issuer');
+        let stripe = null;
+        let cardElement = null;
+
+        function detectCardIssuer(num) {
+            const cc = num.replace(/\s+/g, '');
+            if (/^4/.test(cc)) return 'Visa';
+            if (/^(5[1-5])/.test(cc) || /^(22[2-9]|2[3-6][0-9]|27[01]|2720)/.test(cc)) return 'Mastercard';
+            if (/^3[47]/.test(cc)) return 'American Express';
+            if (/^8600/.test(cc)) return 'Uzcard';
+            if (/^9860/.test(cc)) return 'Humo';
+            return '';
+        }
+
+        const foodBookingFormEl = document.getElementById('foodBookingForm');
+        if (foodBookingFormEl) {
+            foodBookingFormEl.addEventListener('submit', function (e) {
+                // If reservation area is visible (food-service flow), allow normal submit (cash)
+                if (reservationAreaRow && reservationAreaRow.style.display !== 'none') {
+                    // ensure an area is selected
+                    if (!document.querySelector('input[name="reservation_area"]:checked')) {
+                        const firstArea = document.querySelector('input[name="reservation_area"]');
+                        if (firstArea) firstArea.checked = true;
+                    }
+                    if ((!foodBookingFormEl.action || foodBookingFormEl.action.trim() === '') && hiddenBusinessId && hiddenBusinessId.value) {
+                        foodBookingFormEl.action = '/business/' + hiddenBusinessId.value + '/';
+                    }
+                    return; // let the form submit normally
+                }
+
+                // Otherwise intercept and show payment modal
+                e.preventDefault();
+                if (window.jQuery && typeof jQuery(paymentModalEl).modal === 'function') {
+                    jQuery(paymentModalEl).modal('show');
+                } else if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                    const pm = new window.bootstrap.Modal(paymentModalEl);
+                    pm.show();
+                }
+            });
+        }
+
+        // initialize Stripe Elements if publishable key exists
+        const stripeKey = '{{ STRIPE_PUBLISHABLE_KEY|default:"" }}';
+        if (stripeKey) {
+            const s = document.createElement('script');
+            s.src = 'https://js.stripe.com/v3/';
+            s.onload = function () {
+                try {
+                    stripe = Stripe(stripeKey);
+                    const elements = stripe.elements();
+                    cardElement = elements.create('card', {hidePostalCode: true});
+                    cardElement.mount('#card-element');
+                    cardElement.on('change', function (event) {
+                        if (event.error) {
+                            cardErrorsEl.textContent = event.error.message;
+                        } else {
+                            cardErrorsEl.textContent = '';
+                        }
+                        // detect brand
+                        if (event.brand) {
+                            cardIssuerEl.textContent = 'Karta turi: ' + event.brand;
+                        }
+                    });
+                } catch (e) {
+                    console.error('Stripe init error', e);
+                }
+            };
+            document.head.appendChild(s);
+        }
+
+        if (confirmPaymentBtn) {
+            confirmPaymentBtn.addEventListener('click', function () {
+                if (!stripe || !cardElement) {
+                    // fallback: proceed with form submit to redirect-based flow
+                    const hiddenPayment = document.getElementById('hidden_payment_method');
+                    if (hiddenPayment) hiddenPayment.value = 'stripe';
+                    setTimeout(function () { foodBookingFormEl.submit(); }, 250);
+                    return;
+                }
+
+                confirmPaymentBtn.disabled = true;
+                stripe.createToken(cardElement).then(function (result) {
+                    confirmPaymentBtn.disabled = false;
+                    if (result.error) {
+                        cardErrorsEl.textContent = result.error.message;
+                        return;
+                    }
+                    // set hidden fields and submit
+                    const hiddenPayment = document.getElementById('hidden_payment_method');
+                    if (hiddenPayment) hiddenPayment.value = 'stripe';
+                    let tokenInput = document.getElementById('stripe_token_input');
+                    if (!tokenInput) {
+                        tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = 'stripeToken';
+                        tokenInput.id = 'stripe_token_input';
+                        foodBookingFormEl.appendChild(tokenInput);
+                    }
+                    tokenInput.value = result.token.id;
+                    let last4Input = document.getElementById('card_last4_input');
+                    if (!last4Input) {
+                        last4Input = document.createElement('input');
+                        last4Input.type = 'hidden';
+                        last4Input.name = 'card_last4';
+                        last4Input.id = 'card_last4_input';
+                        foodBookingFormEl.appendChild(last4Input);
+                    }
+                    last4Input.value = result.token.card.last4;
+                    // hide modal then submit
+                    if (window.jQuery && typeof jQuery(paymentModalEl).modal === 'function') {
+                        jQuery(paymentModalEl).modal('hide');
+                    } else if (window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+                        const pm = new window.bootstrap.Modal(paymentModalEl);
+                        pm.hide();
+                    }
+                    setTimeout(function () { foodBookingFormEl.submit(); }, 250);
+                });
+            });
+        }
+    });
+</script>
+
+
+{% endblock %}

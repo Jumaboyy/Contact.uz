@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <section class="section">
+          <div class="section-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-1"></div>
+                <div class="col-10">
+                    <div class="card">
+                    <div class="card-header">
+                        <h4>Biznes qo'shish</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                          <label>Biznes nomi</label>
+                          <input type="text" class="form-control" name="name" placeholder="Biznes nomini kiriting.." required>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Categorya</label>
+                          <select name="category" class="form-control" id="category-select">
+                            {% for category in categories %}
+                            <option value="{{category.id}}">{{category.name}}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Egasi ismi</label>
+                          <input type="text" class="form-control" name="owner_first_name" placeholder="Ismingiz" required>
+                        </div>
+                        <div class="form-group">
+                          <label>Egasi familiyasi</label>
+                          <input type="text" class="form-control" name="owner_last_name" placeholder="Familyangiz" required>
+                        </div>
+                        <div class="form-group">
+                          <label>Pasport yoki ID ma'lumotlari</label>
+                          <input type="text" class="form-control" name="owner_passport" placeholder="Pasport raqami yoki ID">
+                        </div>
+
+                        <div class="form-group hotel-only" style="display:none;">
+                          <label>Platforma komissiya foizi</label>
+                          <input type="number" class="form-control" name="commission_percentage" placeholder="Masalan: 10" min="0" max="100" step="0.1">
+                          <small class="form-text text-muted">Agar mehmonxona rezervlari uchun platforma necha foiz oladi, shu yerga kiriting.</small>
+                        </div>
+
+<!-- Viloyat tanlash -->
+<div class="form-group">
+  <label>Viloyat</label>
+  <select name="region" class="form-control" id="region-select">
+    <option value="">Viloyatni tanlang</option>
+    {% for region in regions %}
+      <option value="{{ region.id }}">{{ region.name }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<!-- Tuman tanlash -->
+<div class="form-group">
+  <label>Tuman</label>
+  <select name="district" class="form-control" id="district-select">
+    <option value="">Avval viloyatni tanlang</option>
+    {% for district in districts %}
+      <option value="{{ district.id }}" data-region="{{ district.region.id }}">
+        {{ district.name }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+
+                        <script>
+  const regionSelect = document.getElementById('region-select');
+  const districtSelect = document.getElementById('district-select');
+
+  function filterDistricts() {
+    const selectedRegion = regionSelect.value;
+
+    Array.from(districtSelect.options).forEach(option => {
+      const regionId = option.getAttribute('data-region');
+      if (!regionId || regionId === selectedRegion) {
+        option.style.display = 'block';
+      } else {
+        option.style.display = 'none';
+      }
+    });
+
+    // Default tanlovni qo‘yamiz
+    districtSelect.value = '';
+  }
+
+  regionSelect.addEventListener('change', filterDistricts);
+
+  const categorySelect = document.getElementById('category-select');
+  const hotelFields = document.querySelectorAll('.hotel-only');
+
+  function updateCategoryFields() {
+    const categoryText = categorySelect.options[categorySelect.selectedIndex].text.toLowerCase();
+    const showHotel = categoryText.includes('mehmonxona') || categoryText.includes('hotel');
+    hotelFields.forEach(field => {
+      field.style.display = showHotel ? 'block' : 'none';
+      const input = field.querySelector('input');
+      if (input) {
+        input.required = showHotel;
+      }
+    });
+  }
+
+  categorySelect.addEventListener('change', updateCategoryFields);
+  updateCategoryFields();
+</script>
+
+
+                        <div class="form-group">
+                        <label>Rasm</label>
+                        <input type="file" class="form-control" name="image">
+                        </div>
+
+                        <div class="form-group">
+                          <label>Narx (so‘m)</label>
+                          <input type="number" class="form-control" name="price" placeholder="Narxni belgilang" min="0" step="1000" required>
+                        </div>
+                        <div class="form-group">
+                          <label>Veb-sayt (agar mavjud bo‘lsa)</label>
+                          <input type="url" class="form-control" name="website" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                          <label>Instagram sahifasi (agar mavjud bo‘lsa)</label>
+                          <input type="url" class="form-control" name="instagram" placeholder="https://instagram.com/...">
+                        </div>
+                        <div class="form-group">
+                          <label>Joylashuv:</label>
+                          <input type="text" class="form-control" name="location" placeholder="Masalan: Qoraqalpoq, Toshkent, Chilonzor...">
+                        </div>
+                        <div class="form-group">
+                          <label>Manzil:</label>
+                          <textarea name="address" class="form-control" placeholder="batasil manzil"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                          <label>Telefon raqam</label>
+                          <input type="text" class="form-control" name="phone" placeholder="telefon raqamni  kiriting">
+                        </div>
+
+                    <div class="card-footer text-right">
+                        <button class="btn btn-primary mr-1" type="submit">Yaratish </button>
+                    </div>
+                    </div>
+            
+                </div>
+                
+                </div>
+            </form>
+          </div>
+        </section>
+        <div class="settingSidebar">
+          <a href="javascript:void(0)" class="settingPanelToggle"> <i class="fa fa-spin fa-cog"></i>
+          </a>
+          <div class="settingSidebar-body ps-container ps-theme-default">
+            <div class=" fade show active">
+              <div class="setting-panel-header">Setting Panel
+              </div>
+              <div class="p-15 border-bottom">
+                <h6 class="font-medium m-b-10">Select Layout</h6>
+                <div class="selectgroup layout-color w-50">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="value" value="1" class="selectgroup-input-radio select-layout" checked>
+                    <span class="selectgroup-button">Light</span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="value" value="2" class="selectgroup-input-radio select-layout">
+                    <span class="selectgroup-button">Dark</span>
+                  </label>
+                </div>
+              </div>
+              <div class="p-15 border-bottom">
+                <h6 class="font-medium m-b-10">Sidebar Color</h6>
+                <div class="selectgroup selectgroup-pills sidebar-color">
+                  <label class="selectgroup-item">
+                    <input type="radio" name="icon-input" value="1" class="selectgroup-input select-sidebar">
+                    <span class="selectgroup-button selectgroup-button-icon" data-toggle="tooltip"
+                      data-original-title="Light Sidebar"><i class="fas fa-sun"></i></span>
+                  </label>
+                  <label class="selectgroup-item">
+                    <input type="radio" name="icon-input" value="2" class="selectgroup-input select-sidebar" checked>
+                    <span class="selectgroup-button selectgroup-button-icon" data-toggle="tooltip"
+                      data-original-title="Dark Sidebar"><i class="fas fa-moon"></i></span>
+                  </label>
+                </div>
+              </div>
+              <div class="p-15 border-bottom">
+                <h6 class="font-medium m-b-10">Color Theme</h6>
+                <div class="theme-setting-options">
+                  <ul class="choose-theme list-unstyled mb-0">
+                    <li title="white" class="active">
+                      <div class="white"></div>
+                    </li>
+                    <li title="cyan">
+                      <div class="cyan"></div>
+                    </li>
+                    <li title="black">
+                      <div class="black"></div>
+                    </li>
+                    <li title="purple">
+                      <div class="purple"></div>
+                    </li>
+                    <li title="orange">
+                      <div class="orange"></div>
+                    </li>
+                    <li title="green">
+                      <div class="green"></div>
+                    </li>
+                    <li title="red">
+                      <div class="red"></div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="p-15 border-bottom">
+                <div class="theme-setting-options">
+                  <label class="m-b-0">
+                    <input type="checkbox" name="custom-switch-checkbox" class="custom-switch-input"
+                      id="mini_sidebar_setting">
+                    <span class="custom-switch-indicator"></span>
+                    <span class="control-label p-l-10">Mini Sidebar</span>
+                  </label>
+                </div>
+              </div>
+              <div class="p-15 border-bottom">
+                <div class="theme-setting-options">
+                  <label class="m-b-0">
+                    <input type="checkbox" name="custom-switch-checkbox" class="custom-switch-input"
+                      id="sticky_header_setting">
+                    <span class="custom-switch-indicator"></span>
+                    <span class="control-label p-l-10">Sticky Header</span>
+                  </label>
+                </div>
+              </div>
+              <div class="mt-4 mb-4 p-3 align-center rt-sidebar-last-ele">
+                <a href="#" class="btn btn-icon icon-left btn-primary btn-restore-theme">
+                  <i class="fas fa-undo"></i> Restore Default
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        {% endblock %}
